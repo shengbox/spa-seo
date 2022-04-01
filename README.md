@@ -6,13 +6,13 @@
 ![RUNOOB 图标](https://shengbox-picture-bed.oss-cn-hangzhou.aliyuncs.com/WechatIMG72.jpeg)  
 
 
-1. 使用nginx常规部署spa服务给客户使. [参考nginx反向代理配置](#nginx反向代理配置)
+1. 使用nginx常规部署spa服务给客户使. [nginx反向代理配置参考](#nginx反向代理配置参考)
 2. 额外部署seo服务器，seo服务器内部使用chrome访问spa服务，渲染执行完毕的document给爬虫
 ```
 注意点：在nginx配置上添加更加通过 user_agent 头来 判断是否是爬虫的配置，是爬虫就转向seo服务器
 ```
 
-## docker 部署
+## docker 部署 seo服务
 ```dockerfile
 docker run -p 8000:80 shengbox/spa-seo spa-seo -t https://www.spa.com -p 80
 ```
@@ -27,7 +27,9 @@ docker run -p 8000:80 shengbox/spa-seo spa-seo -t https://www.spa.com -p 80
 
 
 
-## nginx反向代理配置
+## 部署spa服务 
+
+### nginx反向代理配置参考
 
 ```
 # seo：服务端动态渲染方案-nginx判断爬虫
