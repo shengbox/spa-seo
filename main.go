@@ -11,7 +11,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-var target = flag.String("t", "https://www.cmvalue.com", "单页面应用域名")
+var target = flag.String("t", "", "单页面应用域名")
 var port = flag.Int("p", 8000, "本服务监听端口")
 
 func main() {
@@ -19,6 +19,9 @@ func main() {
 	cache := map[string]string{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if *target == "" {
+			*target = "https://" + r.Host
+		}
 		log.Println(r.URL.String())
 		if value, ok := cache[r.URL.String()]; ok {
 			w.Write([]byte(value))
@@ -39,6 +42,7 @@ func main() {
 func HttpHtmlContent(url string) (htmlContent string, err error) {
 	options := []chromedp.ExecAllocatorOption{
 		chromedp.Flag("headless", true),
+		chromedp.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36"),
 	}
 	c, _ := chromedp.NewExecAllocator(context.Background(), options...)
 	chromeCtx, cancel := chromedp.NewContext(c)

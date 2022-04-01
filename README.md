@@ -2,6 +2,11 @@
 
 解决单页面应用SEO问题
 
+## 方案
+![RUNOOB 图标](https://shengbox-picture-bed.oss-cn-hangzhou.aliyuncs.com/WechatIMG72.jpeg)  
+
+### nginx反向代理配置
+
 ```
 # seo2：服务端动态渲染方案-nginx判断爬虫
 server {
