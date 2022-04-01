@@ -5,37 +5,70 @@
 ## 方案
 ![RUNOOB 图标](https://shengbox-picture-bed.oss-cn-hangzhou.aliyuncs.com/WechatIMG72.jpeg)  
 
-### nginx反向代理配置
+
+1. 使用nginx常规部署spa服务给客户使. [参考nginx反向代理配置](#nginx反向代理配置)
+2. 额外部署seo服务器，seo服务器内部使用chrome访问spa服务，渲染执行完毕的document给爬虫
+```
+注意点：在nginx配置上添加更加通过 user_agent 头来 判断是否是爬虫的配置，是爬虫就转向seo服务器
+```
+
+## docker 部署
+```dockerfile
+docker run -p 8000:80 shengbox/spa-seo spa-seo -t https://www.spa.com -p 80
+```
+
+|  参数   | 必填  |说明 |
+|  ----------  | ----  |---------- |
+|  -p  | true  |  部署seo服务器端口  |
+| -t  | false |  spa客户端域名地址， 默认获取nginx代理过来的域名，<br/> 如果填写了参数例如https://www.spa.com, 内部默认为该设置的参数   |
+
+
+
+
+
+
+## nginx反向代理配置
 
 ```
-# seo2：服务端动态渲染方案-nginx判断爬虫
+# seo：服务端动态渲染方案-nginx判断爬虫
+
 server {
-    listen  80;
-    server_name www.cmvalue.seo2;
+        listen 80;
+        add_header Access-Control-Allow-Origin *;
+        # gzip config
+        client_max_body_size 100M;
+        gzip on;
+        gzip_min_length 1k;
+        gzip_comp_level 9;
+        gzip_types text/plain text/css text/javascript application/json application/javascript application/x-javascript application/xml;
+        gzip_vary on;
+        gzip_disable "MSIE [1-6]\.";
+        root /usr/share/nginx/html;
 
-    add_header Access-Control-Allow-Origin *;
-
-    location /homepage {
-        if ($http_user_agent ~* "googlebot|google-structured-data-testing-tool|Mediapartners-Google|bingbot|linkedinbot|baiduspider|360Spider|Sogou Spider|Yahoo! Slurp China|Yahoo! Slurp|twitterbot|facebookexternalhit|rogerbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator") {
-          set $agent $http_user_agent;
-          proxy_pass  http://www.cmvalue.seo2:7001;
-          break;
+        location ~.*\.html$ {
+            add_header Cache-Control "no-cache, no-store";
         }
 
-        alias /var/www/f2e/yl-homepage/;
-        index  index.html index.htm;
-        try_files $uri $uri/ /homepage/index.html;
-    }
+        location / {
+            # 用于是否是判断爬虫
+            if ($http_user_agent ~* "googlebot|google-structured-data-testing-tool|Mediapartners-Google|bingbot|linkedinbot|baiduspider|360Spider|Sogou Spider|Yahoo! Slurp China|Yahoo! Slurp|twitterbot|facebookexternalhit|rogerbot|embedly|quora link preview|showyoubot|outbrain|pinterest|slackbot|vkShare|W3C_Validator") {
+                set $agent $http_user_agent;
+                 # 代理到seo服务器
+                proxy_pass  http://www.seo.com;
+                break;
+            }
+            # 不是就正常访问spa服务器
+            # 用于配合 browserHistory使用
+            try_files $uri $uri/ /index.html;
 
-    location ~ /api/ {
-        proxy_pass  https://www.cmvalue.com;
+            # 如果有资源，建议使用 https + http2，配合按需加载可以获得更好的体验
+            # rewrite ^/(.*)$ https://preview.pro.ant.design/$1 permanent;
+        }
+        # spa服务请求后端api代理（可选）
+        location  /api/ {
+            proxy_pass  https://api.xx.com/api/;
+        }
     }
 }
 ```
 
-## docker 部署
-
-docker run -p 8000:80 shengbox/spa-seo spa-seo -t https://www.cmvalue.com -p 80
-
--t 为单页面应用域名
--p 为本服务端口
