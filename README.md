@@ -19,8 +19,9 @@ docker run -p 8000:80 shengbox/spa-seo spa-seo -t https://www.spa.com -p 80
 
 |  参数   | 必填  |说明 |
 |  ----------  | ----  |---------- |
-|  -p  | true  |  部署seo服务器端口  |
-| -t  | false |  spa客户端域名地址， 默认获取nginx代理过来的域名，<br/> 如果填写了参数例如https://www.spa.com, 内部默认为该设置的参数   |
+| 8000|true | 部署seo服务端口,可自行修改  |
+|  80 | true  |  docker内部go服务的端口,可自行修改，但前后必须保持一致  |
+|  -t  | false |  spa客户端域名地址， 默认获取nginx代理过来的域名，<br/> 如果填写了参数例如https://www.spa.com, 内部设置的该参数为客户端域名地址   |
 
 
 
